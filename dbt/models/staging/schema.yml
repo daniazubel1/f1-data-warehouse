@@ -1,0 +1,21 @@
+
+version: 2
+
+sources:
+  - name: f1_raw
+    database: airflow
+    schema: public
+    tables:
+      - name: raw_drivers
+      - name: raw_circuits
+      - name: raw_constructors
+      - name: raw_races
+
+models:
+  - name: stg_drivers
+    description: "Staging view for drivers"
+    columns:
+      - name: driverId
+        tests:
+          - unique
+          - not_null
