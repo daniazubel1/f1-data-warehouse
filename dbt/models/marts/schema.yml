@@ -1,0 +1,14 @@
+
+version: 2
+
+models:
+  - name: dim_drivers
+    description: "Driver dimension"
+    columns:
+      - name: driver_ref
+        tests:
+          - unique
+          - not_null
+  - name: dim_circuits
+  - name: dim_constructors
+  - name: dim_races
