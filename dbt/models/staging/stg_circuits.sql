@@ -6,8 +6,8 @@ select
     "circuitId" as circuit_ref,
     "url",
     "circuitName" as circuit_name,
-    "Location.country" as country,
-    "Location.locality" as locality,
-    "Location.lat"::float as lat,
-    "Location.long"::float as lng
+    "country",
+    "locality",
+    "lat"::float as lat,
+    "long"::float as lng
 from source

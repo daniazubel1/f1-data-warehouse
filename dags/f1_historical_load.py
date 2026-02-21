@@ -26,9 +26,11 @@ def fetch_all_ergast_data(resource_url, limit=1000):
             response.raise_for_status()
             data = response.json()
             mr_data = data['MRData']
-            table_key = list(mr_data.keys())[1] # usually 'DriverTable', 'RaceTable' etc.
+            # Find the key ending in 'Table' (e.g., DriverTable, RaceTable)
+            table_key = next(key for key in mr_data.keys() if key.endswith('Table'))
             # The list inside might be 'Drivers', 'Races' etc.
-            inner_list = list(mr_data[table_key].values())[0] # The list of items
+            # Find the value that is a list
+            inner_list = next((v for v in mr_data[table_key].values() if isinstance(v, list)), [])
             
             if not inner_list:
                 break
@@ -46,7 +48,7 @@ def fetch_all_ergast_data(resource_url, limit=1000):
     return all_data
 
 def load_drivers(**kwargs):
-    drivers = fetch_all_ergast_data("http://ergast.com/api/f1/drivers.json")
+    drivers = fetch_all_ergast_data("http://api.jolpi.ca/ergast/f1/drivers.json")
     df = pd.DataFrame(drivers)
     # Basic cleaning handles nested API structure? 
     # Ergast returns clean dicts mostly, but nested URL or driverId
@@ -63,7 +65,7 @@ def load_drivers(**kwargs):
     logging.info(f"Loaded {len(df)} drivers to raw_drivers")
 
 def load_circuits(**kwargs):
-    circuits = fetch_all_ergast_data("http://ergast.com/api/f1/circuits.json")
+    circuits = fetch_all_ergast_data("http://api.jolpi.ca/ergast/f1/circuits.json")
     df = pd.DataFrame(circuits)
     # Location is nested: "Location": {"lat": "...", "long": "...", "locality": "...", "country": "..."}
     # Need to flatten location
@@ -77,7 +79,7 @@ def load_circuits(**kwargs):
     logging.info(f"Loaded {len(df)} circuits to raw_circuits")
 
 def load_constructors(**kwargs):
-    constructors = fetch_all_ergast_data("http://ergast.com/api/f1/constructors.json")
+    constructors = fetch_all_ergast_data("http://api.jolpi.ca/ergast/f1/constructors.json")
     df = pd.DataFrame(constructors)
     
     hook = PostgresHook(postgres_conn_id='postgres_default')
@@ -88,7 +90,7 @@ def load_constructors(**kwargs):
 def load_races(**kwargs):
     # Races might need more careful handling (seasons)
     # for simplicity, assume we can fetch all (might be large)
-    races = fetch_all_ergast_data("http://ergast.com/api/f1/races.json")
+    races = fetch_all_ergast_data("http://api.jolpi.ca/ergast/f1/races.json")
     df = pd.DataFrame(races)
     # Circuit is nested
     if 'Circuit' in df.columns:
